@@ -9,56 +9,18 @@
 
 __global__ static void Conv(const float* a, int lda, const float* b, int ldb, float* c, int ldc)
 {
-	extern __device__ float data[];
-	extern __shared__ float img_crop[];//NUM_THREADS+(ldb-1)*ldb
+	extern __shared__ float data[];
 	const int tid = threadIdx.x;
 	const int bid = blockIdx.x;
     const int idx = bid * blockDim.x + tid;
 	const int row = idx / ldc;
 	const int column = idx % ldc;
-	int i,  j, k;
+	int i,  j;
 	
 	for(i = 0; i < ldb*ldb; i ++){
 		data[i] = b[i];
 	}
-	int img_c=0
-
-	if ((lda-ldb+1)%NUM_THREADS==0)
-	{
-		i = NUM_THREADS*lda;
-	}
-	else if (bid/((lda-ldb+1)/NUM_THREADS+1)==0)
-	{
-		i = ((lda-ldb+1)/NUM_THREADS) * lda;
-	}
-	else{
-		i = ((lda-ldb+1)/NUM_THREADS)*lda + NUM_THREADS*(lda-ldb+1)%NUM_THREADS
-	}
-	for (k= 0;k<ldb;k++)
-	{
-		for (j=0;j<NUM_THREADS+ldb-1;j++)
-		{
-			if ((i+j)%lda==0)break;
-			img_crop[img_c] = a[i+j+k*lda];
-		}
-		img_c++;
-	}
-
 	__syncthreads();
-
-	
-	for (i = 0;i<n-ldb+1;i++)
-	{
-		float t = 0;
-		for(j = 0;j<ldb*ldb;j++))
-		{
-			t += data[j]*img_crop[i+n*(j/ldb)+j%ldb]
-		}
-		if(t>255){c[]=255;}
-        else if(t<0){ c[]=0;}
-        else{ c[] = t;}
-	}
-
     // printf("bid %d \n",bid); 
     if(row < ldc && column < ldc) 
 	{
@@ -69,8 +31,8 @@ __global__ static void Conv(const float* a, int lda, const float* b, int ldb, fl
 		}
         // printf("t %.0f ",t);
         // printf("c %d \t",bid * blockDim.x + tid);
-        if(t>255){c[idx]=255;}
-        else if(t<0){ c[idx]=0;}
+        if(t>255){c[bid * blockDim.x + tid]=255;}
+        else if(t<0){ c[bid * blockDim.x + tid]=0;}
         else{ c[idx] = t;}
 		// printf(" %.0f ",c[row * ldc + column]);
 	}
@@ -95,7 +57,7 @@ clock_t conv(const float* a, int lda, const float* b, int ldb, float* c, int ldc
 	int blocks = (ldc*ldc) / NUM_THREADS;
     // printf("blocks %d\n ",blocks);
     // Conv<<<blocks, NUM_THREADS>>>(ac, lda, bc, ldb, cc, ldc);
-    Conv<<<blocks, NUM_THREADS,sizeof(float) * NUM_THREADS+(ldb-1)*ldb>>>(ac, lda, bc, ldb, cc, ldc);
+    Conv<<<blocks, NUM_THREADS,sizeof(float) * ldb*ldb>>>(ac, lda, bc, ldb, cc, ldc);
 
     //函式名稱<<<block 數目, thread 數目, shared memory 大小>>>(參數...);
 
