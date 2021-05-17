@@ -9,7 +9,7 @@
 
 __global__ static void Conv(const float* a, int lda, const float* b, int ldb, float* c, int ldc)
 {
-	extern __shared__ float data[];
+	extern __device__ float data[];
 	const int tid = threadIdx.x;
 	const int bid = blockIdx.x;
     const int idx = bid * blockDim.x + tid;
