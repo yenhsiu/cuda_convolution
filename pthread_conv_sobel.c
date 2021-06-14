@@ -4,8 +4,8 @@
 
 // #define NUM_THREADS 256
 #define K 3
-#define IMG 11400
-#define OUT 11398
+#define IMG 320
+#define OUT 318
 // float kernel[9] = {1,2,1,0,0,0,-1,-2,-1};
 float kernel[9] = {1,0,-1,2,0,-2,1,0,-1};
 float img [IMG*IMG];
