@@ -3,11 +3,11 @@
 #include <stdlib.h>
 
 
-#define K 3
+#define K 5
 #define IMG 320
-#define OUT 318
+#define OUT 316
 // float kernel[9] = {1,2,1,0,0,0,-1,-2,-1};
-float kernel[9] = {1,0,-1,2,0,-2,1,0,-1};
+float gauss[25] = {1,4,6,4,1,4,16,24,16,4,6,24,36,24,6,4,16,24,16,4,1,4,6,4,1};
 float img [IMG*IMG];
 float output [OUT*OUT];
 
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
     int i,j, k = 0;
     time= omp_get_wtime() ;
-    #pragma omp parallel shared(img,kernel,output)
+    #pragma omp parallel shared(img,gauss,output)
 	{
     #pragma omp for //schedule(dynamic)
 		for(int i =0;i<OUT;i++)
@@ -61,12 +61,12 @@ int main(int argc, char *argv[])
                     {
                         int row = (i*OUT+j)/OUT;
                         int col = (i*OUT+j)%OUT;
-                        sum += img[(row+kl)*IMG+col+kc] * kernel[kl*OUT+kc];
+                        sum += img[(row+kl)*IMG+col+kc] * gauss[kl*K+kc];
                     }
                 }
-                if(sum>255){sum=255;}
-                else if(sum<0){ sum=0;}
-                else{sum=sum;}
+                if((sum/256)>255){sum=255;}
+                else if((sum/256)<0){ sum=0;}
+                else{ sum = (sum/256);}
                 output[i*OUT+j] = sum;
             }
         }
