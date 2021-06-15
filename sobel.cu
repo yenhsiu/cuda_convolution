@@ -4,7 +4,7 @@
 #include <cuda_runtime.h>
 
 #define NUM_THREADS 256
-#define BLOCK_SIZE	16
+// #define BLOCK_SIZE	16
 
 
 __global__ static void Conv(const float* a, int lda, const float* b, int ldb, float* c, int ldc)
@@ -25,9 +25,12 @@ __global__ static void Conv(const float* a, int lda, const float* b, int ldb, fl
     if(row < ldc && column < ldc) 
 	{
 		float t = 0;
-		for (j = 0;j<ldb*ldb;j++)
+		for (int kl= 0;kl<ldb;kl++)
 		{
-			t += a[ lda*row + column + lda*(j/ldc) + j%ldc ] * data[j];	     
+			for(int kc=0;kc<ldb;kc++)
+			{
+				t += a[(row+kl)*lda+column+kc] * data[kl*ldb+kc];
+			}
 		}
         // printf("t %.0f ",t);
         // printf("c %d \t",bid * blockDim.x + tid);
