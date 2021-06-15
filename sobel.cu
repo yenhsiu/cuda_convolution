@@ -57,7 +57,7 @@ clock_t conv(const float* a, int lda, const float* b, int ldb, float* c, int ldc
 
     cudaMemcpy2D(ac, sizeof(float) * lda, a, sizeof(float) * lda, sizeof(float) * lda, lda, cudaMemcpyHostToDevice);
 	cudaMemcpy2D(bc, sizeof(float) * ldb, b, sizeof(float) * ldb, sizeof(float) * ldb, ldb, cudaMemcpyHostToDevice);
-	int blocks = (ldc*ldc) / NUM_THREADS;
+	int blocks = ldc / NUM_THREADS;
     // printf("blocks %d\n ",blocks);
     // Conv<<<blocks, NUM_THREADS>>>(ac, lda, bc, ldb, cc, ldc);
     Conv<<<blocks, NUM_THREADS,sizeof(float) * ldb*ldb>>>(ac, lda, bc, ldb, cc, ldc);
